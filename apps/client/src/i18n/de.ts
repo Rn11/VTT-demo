@@ -1,0 +1,171 @@
+/** Alle Oberflächentexte. Für eine weitere Sprache diese Datei kopieren und übersetzen. */
+export const de = {
+  appName: 'Spieltisch',
+  loading: 'Lädt …',
+  save: 'Speichern',
+  cancel: 'Abbrechen',
+  delete: 'Löschen',
+  edit: 'Bearbeiten',
+  close: 'Schließen',
+  create: 'Anlegen',
+  rename: 'Umbenennen',
+  upload: 'Hochladen',
+  none: '– keine –',
+  confirmDelete: '„{name}“ wirklich löschen?',
+  copied: 'Kopiert!',
+  error: 'Fehler',
+
+  // Anmeldung
+  setupTitle: 'Willkommen! Lege das erste Spielleiter-Konto an',
+  setupHint:
+    'Dieses Konto verwaltet Abenteuer. Spieler brauchen kein Konto – sie kommen per Einladungslink.',
+  loginTitle: 'Anmeldung für Spielleiter',
+  loginHint: 'Spieler brauchen keine Anmeldung, sondern den Einladungslink vom Spielleiter.',
+  name: 'Name',
+  password: 'Passwort',
+  passwordHint: 'mindestens 8 Zeichen',
+  login: 'Anmelden',
+  logout: 'Abmelden',
+  setupSubmit: 'Konto anlegen',
+
+  // Übersicht
+  dashboardTitle: 'Deine Abenteuer',
+  newAdventure: 'Neues Abenteuer',
+  adventureName: 'Name des Abenteuers',
+  withSamples: 'Mit Beispielkarte und -figuren zum Ausprobieren',
+  open: 'Öffnen',
+  inviteLink: 'Einladungslink',
+  copyInvite: 'Einladungslink kopieren',
+  renewInvite: 'Neuen Link erzeugen',
+  renewInviteConfirm:
+    'Der alte Link funktioniert danach nicht mehr. Bereits beigetretene Spieler bleiben drin. Fortfahren?',
+  export: 'Exportieren',
+  import: 'Abenteuer importieren (ZIP)',
+  importHint:
+    'Spieler und Protokoll werden nicht mit exportiert. Spieler-Charaktere werden beim Import zu NSC.',
+  noAdventures: 'Noch keine Abenteuer. Lege oben eines an.',
+  addGm: 'Weiteres Spielleiter-Konto anlegen',
+  gmCreated: 'Konto „{name}“ angelegt.',
+
+  // Beitritt
+  joinTitle: 'Einladung zu „{name}“',
+  joinHint: 'Wie sollen dich die anderen am Tisch sehen?',
+  yourName: 'Dein Name',
+  join: 'Beitreten',
+  rejoin: 'Weiter als {name}',
+  inviteInvalid:
+    'Dieser Einladungslink ist ungültig oder wurde erneuert. Frag den Spielleiter nach dem aktuellen Link.',
+
+  // Spieltisch
+  noAccess:
+    'Du hast keinen Zugang zu diesem Abenteuer. Bitte nutze den Einladungslink des Spielleiters.',
+  adventureGone: 'Dieses Abenteuer gibt es nicht mehr.',
+  connecting: 'Verbinde …',
+  offline: 'Verbindung unterbrochen – versuche es erneut …',
+  back: 'Zur Übersicht',
+  gm: 'Spielleitung',
+  online: 'online',
+  offlineShort: 'offline',
+  soundOn: 'Ton an',
+  soundOnHint: 'Klicke hier, damit du Musik und Geräusche hörst.',
+  myVolume: 'Meine Lautstärke',
+  showToPlayers: 'Den Spielern zeigen',
+  playersSee: 'Spieler sehen gerade: {name}',
+  viewing: 'Du bearbeitest: {name}',
+  noScene: 'Noch keine Szene. Lege im Reiter „Szene“ eine an.',
+  waitingForScene: 'Der Spielleiter hat noch keine Szene freigegeben.',
+
+  // Reiter
+  tabLog: 'Protokoll',
+  tabHandouts: 'Handouts',
+  tabCharacters: 'Charaktere',
+  tabAudio: 'Musik',
+  tabScene: 'Szene',
+  tabNotes: 'Notizen',
+
+  // Protokoll / Würfel
+  roll: 'Würfeln',
+  rollPlaceholder: 'z. B. 2W6+3, W20, W100, 4W6kh3',
+  rollLabel: 'Wofür? (optional)',
+  hiddenRoll: 'verdeckt',
+  hiddenRollHint: 'Nur du und die Spielleitung sehen den Wurf',
+  chatPlaceholder: 'Nachricht schreiben …',
+  send: 'Senden',
+  hiddenTag: 'verdeckt',
+  emptyLog: 'Noch nichts passiert. Würfle oder schreib etwas!',
+
+  // Handouts
+  newHandout: 'Neues Handout',
+  title: 'Titel',
+  text: 'Text',
+  image: 'Bild',
+  visibility: 'Sichtbar für',
+  visNone: 'Niemand (noch verdeckt)',
+  visAll: 'Alle Spieler',
+  visSome: 'Ausgewählte Spieler',
+  noHandoutsGm:
+    'Noch keine Handouts. Briefe, Hinweise oder Bilder hier anlegen und später aufdecken.',
+  noHandoutsPlayer: 'Noch keine Handouts aufgedeckt.',
+  newBadge: 'neu',
+  noPlayersYet: 'Noch keine Spieler beigetreten.',
+
+  // Notizen
+  newNote: 'Neue Notiz',
+  noteScene: 'Gehört zu Szene',
+  allScenes: 'Ganzes Abenteuer',
+  noNotes: 'Noch keine Notizen. Nur du siehst sie.',
+
+  // Charaktere
+  newCharacter: 'Neuer Charakter',
+  template: 'Bogen-Vorlage',
+  owner: 'Gehört',
+  npc: 'NSC (nur Spielleitung)',
+  noCharacters: 'Noch keine Charaktere.',
+  customFields: 'Eigene Felder',
+  addField: 'Feld hinzufügen',
+  fieldLabel: 'Bezeichnung',
+  fieldValue: 'Wert',
+  readOnly: 'Nur ansehen – gehört {name}',
+  rollField: 'Würfeln',
+  target: 'Ziel {value}',
+
+  // Musik
+  uploadAudio: 'Musik oder Geräusch hochladen',
+  play: 'Abspielen',
+  sfx: 'Einmal abspielen (Geräusch)',
+  pause: 'Pause',
+  resume: 'Weiter',
+  stop: 'Stopp',
+  loop: 'Wiederholen',
+  masterVolume: 'Lautstärke für alle',
+  nowPlaying: 'Es läuft: {name}',
+  nothingPlaying: 'Gerade läuft nichts.',
+  musicPlaying: 'Die Spielleitung spielt Musik.',
+  noTracks: 'Noch keine Audiodateien.',
+
+  // Szene
+  scenes: 'Szenen',
+  newScene: 'Neue Szene',
+  sceneName: 'Name der Szene',
+  active: 'aktiv',
+  map: 'Karte',
+  chooseMap: 'Karte auswählen',
+  uploadImage: 'Bild hochladen',
+  grid: 'Raster anzeigen',
+  gridSize: 'Rastergröße (Pixel pro Feld)',
+  tokens: 'Spielfiguren',
+  newToken: 'Neue Figur',
+  tokenName: 'Name',
+  color: 'Farbe',
+  size: 'Größe (Felder)',
+  hiddenToken: 'Für Spieler versteckt',
+  addToken: 'Figur auf die Karte setzen',
+  selectedToken: 'Ausgewählte Figur',
+  noSelection: 'Klicke eine Figur auf der Karte an, um sie zu bearbeiten.',
+  images: 'Bilder',
+  noImages: 'Noch keine Bilder hochgeladen.',
+  deleteAssetConfirm: '„{name}“ löschen? Karten, Figuren und Handouts verlieren dieses Bild.',
+  mapHint: 'Ziehen: Karte verschieben · Mausrad: zoomen',
+} as const;
+
+export type Dict = { [K in keyof typeof de]: string };
