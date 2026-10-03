@@ -1,0 +1,11 @@
+services:
+  vtt:
+    build: .
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    volumes:
+      - vtt-data:/data
+
+volumes:
+  vtt-data:
