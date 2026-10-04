@@ -15,7 +15,7 @@ import type {
   Token,
 } from '@vtt/shared';
 
-export type Status = 'idle' | 'connecting' | 'online' | 'offline' | 'denied' | 'gone';
+export type Status = 'idle' | 'connecting' | 'online' | 'offline' | 'denied' | 'gone' | 'kicked';
 
 type Rec<T> = Record<string, T>;
 

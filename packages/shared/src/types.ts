@@ -95,8 +95,12 @@ export interface Message {
   kind: MessageKind;
   authorId: string;
   authorName: string;
+  /** Charakter, als der gesprochen/gewürfelt wurde. */
+  characterName: string | null;
   text: string;
   roll: RollResult | null;
+  /** Zielwert eines Prozentwurfs. */
+  target: number | null;
   hidden: boolean;
   createdAt: number;
 }

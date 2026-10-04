@@ -256,3 +256,135 @@ describe('Export und Import', () => {
     expect((await gm.request('POST', '/api/import', bad)).status).toBe(400);
   });
 });
+
+describe('Charakter als Sprecher', () => {
+  it('zeigt den Charakternamen und erlaubt nur eigene Charaktere', async () => {
+    const gm = await setupGm(srv.base);
+    const adv = await createAdventure(gm);
+    const alex = await joinPlayer(srv.base, adv.inviteToken, 'Alex');
+    const kim = await joinPlayer(srv.base, adv.inviteToken, 'Kim');
+    const g = await connect(srv.base, adv.id, gm);
+    const a = await connect(srv.base, adv.id, alex);
+    const k = await connect(srv.base, adv.id, kim);
+
+    const created = await a.act(
+      { type: 'character.create', name: 'Grimm', templateId: 'coc7', ownerPlayerId: null },
+      (m) => m.type === 'upsert' && m.kind === 'character',
+    );
+    const grimm = created.type === 'upsert' ? created.item.id : '';
+
+    const roll = await g.act(
+      { type: 'dice.roll', expression: 'd100', label: 'Horchen', as: null, target: 45 },
+      (m) => m.type === 'message',
+    );
+    expect(roll.type === 'message' && [roll.item.characterName, roll.item.target]).toEqual([
+      null,
+      45,
+    ]);
+
+    const seen = g.next((m) => m.type === 'message');
+    a.send({ type: 'chat.send', text: 'Ich lausche an der Tür.', as: grimm });
+    const said = await seen;
+    expect(said.type === 'message' && [said.item.characterName, said.item.authorName]).toEqual([
+      'Grimm',
+      'Alex',
+    ]);
+
+    const denied = await k.act({ type: 'chat.send', text: 'Ich bin Grimm!', as: grimm }, isError);
+    expect(denied.type).toBe('error');
+
+    // Die Spielleitung darf für jeden Charakter sprechen, z. B. für NSC.
+    const npc = await g.act(
+      { type: 'character.create', name: 'Wirtin', templateId: 'free', ownerPlayerId: null },
+      (m) => m.type === 'upsert' && m.kind === 'character',
+    );
+    const npcId = npc.type === 'upsert' ? npc.item.id : '';
+    const heard = a.next((m) => m.type === 'message');
+    g.send({ type: 'chat.send', text: 'Was darf es sein?', as: npcId });
+    const w = await heard;
+    expect(w.type === 'message' && w.item.characterName).toBe('Wirtin');
+  });
+});
+
+describe('Teilnehmerverwaltung', () => {
+  it('benennt um und entfernt Spieler samt Zugang', async () => {
+    const gm = await setupGm(srv.base);
+    const adv = await createAdventure(gm, true);
+    const alex = await joinPlayer(srv.base, adv.inviteToken, 'Alex');
+    const g = await connect(srv.base, adv.id, gm);
+    const a = await connect(srv.base, adv.id, alex);
+    const pid = a.state.me.playerId!;
+
+    const denied = await a.act({ type: 'player.update', id: pid, name: 'Chef' }, isError);
+    expect(denied.type).toBe('error');
+
+    const renamed = a.next((m) => m.type === 'upsert' && m.kind === 'player');
+    g.send({ type: 'player.update', id: pid, name: 'Alexandra', color: '#123456' });
+    await expect(renamed).resolves.toMatchObject({ item: { name: 'Alexandra', color: '#123456' } });
+
+    // Figur, Charakter und Handout-Freigabe zuweisen
+    const token = g.state.tokens.find((t) => !t.hidden)!;
+    const handout = g.state.handouts[0]!;
+    g.send({ type: 'token.update', id: token.id, ownerPlayerId: pid });
+    g.send({ type: 'handout.update', id: handout.id, visibility: 'some', playerIds: [pid] });
+    await a.act(
+      { type: 'character.create', name: 'Grimm', templateId: 'free', ownerPlayerId: null },
+      (m) => m.type === 'upsert' && m.kind === 'character',
+    );
+
+    const gSince = g.messages.length;
+    g.send({ type: 'player.remove', id: pid });
+    expect(await a.closed).toBe(4403);
+    const after = await g.settle(gSince, 300);
+    expect(after.some((m) => m.type === 'remove' && m.kind === 'player' && m.id === pid)).toBe(
+      true,
+    );
+    expect(
+      after.some(
+        (m) =>
+          m.type === 'upsert' &&
+          m.kind === 'token' &&
+          m.item.id === token.id &&
+          m.item.ownerPlayerId === null,
+      ),
+    ).toBe(true);
+    expect(
+      after.some(
+        (m) => m.type === 'upsert' && m.kind === 'character' && m.item.ownerPlayerId === null,
+      ),
+    ).toBe(true);
+    expect(
+      after.some(
+        (m) =>
+          m.type === 'upsert' &&
+          m.kind === 'handout' &&
+          m.item.id === handout.id &&
+          m.item.playerIds.length === 0,
+      ),
+    ).toBe(true);
+
+    // Der alte Zugang funktioniert nicht mehr.
+    await expect(Client.connect(srv.base, adv.id, alex)).rejects.toThrow('closed 4401');
+  });
+
+  it('lässt Spieler per persönlichem Link einmalig zurückkehren', async () => {
+    const gm = await setupGm(srv.base);
+    const adv = await createAdventure(gm);
+    const alex = await joinPlayer(srv.base, adv.inviteToken, 'Alex');
+    const a = await connect(srv.base, adv.id, alex);
+    const pid = a.state.me.playerId!;
+
+    expect((await alex.post(`/api/adventures/${adv.id}/players/${pid}/link`)).status).toBe(401);
+    const link = await gm.post(`/api/adventures/${adv.id}/players/${pid}/link`);
+    expect(link.status).toBe(200);
+    const code = String(link.json.path).split('/').pop()!;
+
+    const otherDevice = new Agent(srv.base);
+    const used = await otherDevice.post(`/api/rejoin/${code}`);
+    expect(used.json.adventureId).toBe(adv.id);
+    const second = await connect(srv.base, adv.id, otherDevice);
+    expect(second.state.me.playerId).toBe(pid);
+
+    expect((await new Agent(srv.base).post(`/api/rejoin/${code}`)).status).toBe(404);
+  });
+});

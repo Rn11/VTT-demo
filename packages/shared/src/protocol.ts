@@ -102,13 +102,29 @@ export const clientMessage = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('character.delete'), id }),
 
-  // Protokoll
-  z.object({ type: z.literal('chat.send'), text: z.string().min(1).max(2000) }),
+  // Teilnehmer (nur Spielleiter)
+  z.object({
+    type: z.literal('player.update'),
+    id,
+    name: z.string().trim().min(1).max(40).optional(),
+    color: color.optional(),
+  }),
+  z.object({ type: z.literal('player.remove'), id }),
+
+  // Protokoll; `as` = Charakter, für den gesprochen bzw. gewürfelt wird
+  z.object({
+    type: z.literal('chat.send'),
+    text: z.string().min(1).max(2000),
+    as: id.nullable().optional(),
+  }),
   z.object({
     type: z.literal('dice.roll'),
     expression: z.string().min(1).max(200),
     label: z.string().max(120).optional(),
     hidden: z.boolean().optional(),
+    as: id.nullable().optional(),
+    /** Zielwert für Prozentwürfe (Erfolg bei Ergebnis ≤ Ziel). */
+    target: z.number().int().min(0).max(1000).optional(),
   }),
 
   // Musik und Geräusche (nur Spielleiter)

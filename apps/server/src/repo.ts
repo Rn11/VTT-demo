@@ -152,8 +152,10 @@ export const toMessage = (r: Row): Message => ({
   kind: str(r.kind) as Message['kind'],
   authorId: str(r.author_id),
   authorName: str(r.author_name),
+  characterName: strOrNull(r.character_name),
   text: str(r.text),
   roll: parseJson<RollResult | null>(r.roll, null),
+  target: numOrNull(r.target),
   hidden: Boolean(r.hidden),
   createdAt: Number(r.created_at),
 });

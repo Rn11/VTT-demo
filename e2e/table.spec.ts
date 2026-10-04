@@ -126,14 +126,37 @@ test('Spielleitung und Spieler spielen gemeinsam', async ({ browser }) => {
   // Charakterbogen: Spieler legt eigenen Charakter an, SL sieht ihn
   await player.getByRole('tab', { name: 'Charaktere' }).click();
   await player.getByRole('button', { name: /Neuer Charakter/ }).click();
-  await player.getByLabel('Bogen-Vorlage').selectOption('morkborg');
+  await player.getByRole('dialog').getByLabel('Name').fill('Grimm');
+  await player.getByLabel('Bogen-Vorlage').selectOption('coc7');
   await player.getByRole('button', { name: 'Anlegen', exact: true }).click();
   await player.getByTestId('character').click();
-  await player.getByLabel('Stärke').fill('-2');
-  await player.getByLabel('Stärke').blur();
+  await player.getByLabel('Horchen').fill('45');
+  await player.getByLabel('Horchen').blur();
+  // Prozentwurf direkt vom Bogen: Protokoll nennt Charakter, Fertigkeit und Ergebnis
+  await player
+    .getByRole('dialog')
+    .locator('.field', { hasText: 'Horchen' })
+    .getByRole('button')
+    .click();
   await player.keyboard.press('Escape');
   await gm.getByRole('tab', { name: 'Charaktere' }).click();
-  await expect(gm.getByTestId('character')).toContainText('Alex');
+  await expect(gm.getByTestId('character')).toContainText('Grimm');
+  await gm.getByRole('tab', { name: 'Protokoll' }).click();
+  const sheetRoll = gm.getByTestId('log-entry').last();
+  await expect(sheetRoll.getByTestId('log-speaker')).toHaveText('Grimm (Alex)');
+  await expect(sheetRoll).toContainText('Horchen');
+  await expect(sheetRoll.getByTestId('roll-outcome')).toHaveText(
+    /Extremer Erfolg|Schwieriger Erfolg|Erfolg|Misserfolg|Patzer/,
+  );
+
+  // „Ich spiele als …“: mit nur einem Charakter wählt der Spieler automatisch ihn
+  await player.getByRole('tab', { name: 'Protokoll' }).click();
+  await expect(player.getByLabel('Ich spiele als')).toHaveValue(/.+/);
+  await player.getByLabel('Nachricht schreiben …').fill('Ich lausche an der Tür.');
+  await player.getByRole('button', { name: 'Senden' }).click();
+  await expect(gm.getByTestId('log-entry').last().getByTestId('log-speaker')).toHaveText(
+    'Grimm (Alex)',
+  );
 
   // Musik: SL lädt eine Datei hoch und spielt sie ab; der Spieler bekommt den Zustand
   await gm.getByRole('tab', { name: 'Musik' }).click();
@@ -158,6 +181,17 @@ test('Spielleitung und Spieler spielen gemeinsam', async ({ browser }) => {
     .toEqual(['Taverne']);
   expect(Object.keys((await state(player)).tokens)).toHaveLength(0);
   await expect(player.locator('.topbar')).toContainText('Taverne');
+
+  // Teilnehmerverwaltung: umbenennen und entfernen
+  await gm.getByRole('tab', { name: 'Spieler' }).click();
+  const card = gm.getByTestId('player-card');
+  await card.getByLabel('Name').fill('Alexandra');
+  await card.getByLabel('Name').press('Enter');
+  await expect(player.locator('.presence')).toContainText('Alexandra');
+  gm.once('dialog', (d) => void d.accept());
+  await card.getByRole('button', { name: 'Entfernen' }).click();
+  await expect(player.getByText('aus diesem Abenteuer entfernt')).toBeVisible();
+  await expect(gm.getByTestId('player-card')).toHaveCount(0);
 
   expect(pageErrors).toEqual([]);
 });

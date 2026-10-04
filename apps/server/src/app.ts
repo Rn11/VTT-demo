@@ -254,6 +254,35 @@ export async function buildApp(config: Config) {
     return { adventureId: adv.id };
   });
 
+  /** Persönlicher, einmal nutzbarer Link, mit dem ein Spieler (z. B. auf einem anderen Gerät) zurückkommt. */
+  app.post('/api/adventures/:id/players/:playerId/link', async (req) => {
+    const { id, playerId } = parse(
+      z.object({ id: z.string().max(64), playerId: z.string().max(64) }),
+      req.params,
+    );
+    ownAdventure(req, id);
+    const code = newId(18);
+    const r = db
+      .prepare('UPDATE players SET rejoin_code = ? WHERE id = ? AND adventure_id = ?')
+      .run(code, playerId, id);
+    if (Number(r.changes) === 0) fail(404, 'Spieler nicht gefunden.');
+    return { path: `/rejoin/${code}` };
+  });
+
+  app.post('/api/rejoin/:code', async (req, reply) => {
+    const { code } = parse(z.object({ code: z.string().min(1).max(64) }), req.params);
+    const r = db
+      .prepare('SELECT id, adventure_id, token FROM players WHERE rejoin_code = ?')
+      .get(code) as { id: string; adventure_id: string; token: string } | undefined;
+    if (!r) fail(404, 'Dieser persönliche Link ist ungültig oder wurde schon benutzt.');
+    db.prepare('UPDATE players SET rejoin_code = NULL WHERE id = ?').run(r.id);
+    reply.setCookie(playerCookie(String(r.adventure_id)), String(r.token), {
+      ...COOKIE_OPTS,
+      maxAge: 365 * 86400,
+    });
+    return { adventureId: String(r.adventure_id) };
+  });
+
   /** Wer bin ich in diesem Abenteuer? Spielleiter-Besitz geht vor Spieler-Cookie. */
   const viewerFor = (
     cookies: Record<string, string | undefined>,
