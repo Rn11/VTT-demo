@@ -37,6 +37,19 @@ npm start
 
 Der Spieltisch läuft dann auf <http://localhost:3000>.
 
+### Unter Windows (ohne Vorkenntnisse)
+
+1. **Node.js installieren:** Auf <https://nodejs.org> die Version „LTS“ herunterladen (mindestens 22.13) und den Installer mit den Standardeinstellungen durchklicken.
+2. **Code herunterladen:** Auf der GitHub-Seite des Projekts auf **Code → Download ZIP** klicken und die ZIP-Datei entpacken.
+3. **Eingabeaufforderung im Ordner öffnen:** Den entpackten Ordner im Explorer öffnen, oben in die Adresszeile `cmd` tippen und Enter drücken.
+4. **Starten:**
+   ```
+   npm install
+   npm run demo
+   ```
+   Beim ersten Mal dauert das ein paar Minuten. Fragt Windows nach der Firewall, „Zulassen“ klicken.
+5. Im Browser <http://localhost:3000> öffnen. Beenden mit Strg+C im Fenster der Eingabeaufforderung. Beim nächsten Mal reicht `npm start`.
+
 ### Mit Docker
 
 ```bash
