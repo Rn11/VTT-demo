@@ -46,6 +46,8 @@ function silentWav(seconds = 2, rate = 8000): Buffer {
 }
 
 test('Spielleitung und Spieler spielen gemeinsam', async ({ browser }) => {
+  // Spielt einen ganzen Abend durch; auf langsamen CI-Rechnern reicht das Standardlimit nicht.
+  test.setTimeout(180_000);
   const gmCtx = await browser.newContext();
   const gm = await gmCtx.newPage();
   const pageErrors: string[] = [];
