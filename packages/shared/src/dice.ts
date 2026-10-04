@@ -132,3 +132,52 @@ export function describeRoll(r: RollResult): string {
   });
   return `${r.expression} → ${parts.join(' ')} = ${r.total}`;
 }
+
+/* ---------- Deutsche Klartext-Beschreibungen fürs Protokoll ---------- */
+
+/** Würfelausdruck in deutscher Schreibweise, z. B. "2d6+3" → "2W6+3", "d%" → "W100". */
+export function germanExpression(expression: string): string {
+  return expression.replace(/[dw]%/gi, 'W100').replace(/[dw]/gi, 'W');
+}
+
+/** Beschreibt einen Würfelterm, z. B. "4W6, die 3 höchsten zählen". */
+export function describeTerm(t: Extract<RolledTerm, { type: 'dice' }>): string {
+  const base = `${t.count > 1 ? t.count : ''}W${t.sides}`;
+  if (!t.keep) return base;
+  const n = t.keep.count;
+  const which =
+    t.keep.mode === 'high'
+      ? n === 1
+        ? 'der höchste'
+        : `die ${n} höchsten`
+      : n === 1
+        ? 'der niedrigste'
+        : `die ${n} niedrigsten`;
+  return `${base}, ${which} ${n === 1 ? 'zählt' : 'zählen'}`;
+}
+
+export type SuccessLevel = 'extreme' | 'hard' | 'regular' | 'failure' | 'fumble';
+
+/**
+ * Prozentwurf gegen einen Zielwert (Call of Cthulhu / Delta Green):
+ * extrem ≤ Ziel/5, schwer ≤ Ziel/2, Erfolg ≤ Ziel, sonst Misserfolg; 100 ist immer ein Patzer.
+ */
+export function percentileOutcome(total: number, target: number): SuccessLevel {
+  if (total >= 100 || (target < 50 && total >= 96)) return 'fumble';
+  if (total <= Math.floor(target / 5)) return 'extreme';
+  if (total <= Math.floor(target / 2)) return 'hard';
+  if (total <= target) return 'regular';
+  return 'failure';
+}
+
+/** Natürliche 20 bzw. 1 bei einem einzelnen W20 (z. B. "W20+3"). */
+export function naturalD20(r: RollResult): 20 | 1 | null {
+  const dice = r.terms.filter((t): t is Extract<RolledTerm, { type: 'dice' }> => t.type === 'dice');
+  if (dice.length !== 1) return null;
+  const t = dice[0]!;
+  if (t.sides !== 20) return null;
+  const kept = t.rolls.filter((d) => d.kept);
+  if (kept.length !== 1) return null;
+  const v = kept[0]!.value;
+  return v === 20 ? 20 : v === 1 ? 1 : null;
+}

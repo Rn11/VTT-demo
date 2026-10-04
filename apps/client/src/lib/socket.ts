@@ -32,6 +32,7 @@ class GameSocket {
       this.ws = null;
       if (ev.code === 4401) return useGame.getState().setStatus('denied');
       if (ev.code === 4404) return useGame.getState().setStatus('gone');
+      if (ev.code === 4403) return useGame.getState().setStatus('kicked');
       useGame.getState().setStatus('offline');
       const delay = Math.min(10_000, 500 * 2 ** this.retry++);
       this.timer = setTimeout(() => this.open(), delay);

@@ -47,7 +47,7 @@ class TokenView {
     this.label = new Text({
       text: '',
       style: {
-        fontFamily: 'system-ui, sans-serif',
+        fontFamily: 'Alegreya Sans, system-ui, sans-serif',
         fontSize: 14,
         fill: '#ffffff',
         stroke: { color: '#000000', width: 4 },
@@ -76,7 +76,7 @@ class TokenView {
       .circle(0, 0, r)
       .stroke({
         width: selected ? 5 : 3,
-        color: selected ? '#ffd400' : (ownerColor ?? '#ffffff'),
+        color: selected ? '#ebcf86' : (ownerColor ?? '#ffffff'),
         alpha: 0.95,
       });
     this.label.text = tok.name;
@@ -366,7 +366,7 @@ export function MapView() {
     void app
       .init({
         resizeTo: host,
-        background: '#1b1815',
+        background: '#120f0b',
         antialias: true,
         autoDensity: true,
         resolution: Math.min(2, window.devicePixelRatio || 1),

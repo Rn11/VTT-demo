@@ -5,6 +5,7 @@ import { t } from './i18n';
 import { AuthPage } from './pages/Auth';
 import { Dashboard } from './pages/Dashboard';
 import { JoinPage } from './pages/Join';
+import { RejoinPage } from './pages/Rejoin';
 import { TablePage } from './pages/Table';
 
 type Me = { gm: Gm | null; needsSetup: boolean };
@@ -33,6 +34,8 @@ export function App() {
   const path = usePath();
   const join = /^\/join\/([^/]+)$/.exec(path);
   if (join) return <JoinPage token={decodeURIComponent(join[1]!)} />;
+  const rejoin = /^\/rejoin\/([^/]+)$/.exec(path);
+  if (rejoin) return <RejoinPage code={decodeURIComponent(rejoin[1]!)} />;
   const table = /^\/a\/([^/]+)$/.exec(path);
   if (table) return <TablePage key={table[1]} adventureId={decodeURIComponent(table[1]!)} />;
   return <Home />;

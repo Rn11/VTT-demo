@@ -60,6 +60,9 @@ export const de = {
   noAccess:
     'Du hast keinen Zugang zu diesem Abenteuer. Bitte nutze den Einladungslink des Spielleiters.',
   adventureGone: 'Dieses Abenteuer gibt es nicht mehr.',
+  kicked: 'Die Spielleitung hat dich aus diesem Abenteuer entfernt.',
+  rejoinInvalid:
+    'Dieser persönliche Link ist ungültig oder wurde schon benutzt. Bitte die Spielleitung um einen neuen.',
   connecting: 'Verbinde …',
   offline: 'Verbindung unterbrochen – versuche es erneut …',
   back: 'Zur Übersicht',
@@ -82,6 +85,7 @@ export const de = {
   tabAudio: 'Musik',
   tabScene: 'Szene',
   tabNotes: 'Notizen',
+  tabPlayers: 'Spieler',
 
   // Protokoll / Würfel
   roll: 'Würfeln',
@@ -93,6 +97,21 @@ export const de = {
   send: 'Senden',
   hiddenTag: 'verdeckt',
   emptyLog: 'Noch nichts passiert. Würfle oder schreib etwas!',
+  speakingAs: 'Ich spiele als',
+  asMyself: '{name} (ohne Charakter)',
+  asGm: 'Spielleitung',
+  rolls: 'würfelt',
+  says: 'sagt',
+  hiddenRollInfo: 'verdeckt – nur der Werfende und die Spielleitung sehen das',
+  against: 'gegen {target}',
+  outcomeExtreme: 'Extremer Erfolg',
+  outcomeHard: 'Schwieriger Erfolg',
+  outcomeRegular: 'Erfolg',
+  outcomeFailure: 'Misserfolg',
+  outcomeFumble: 'Patzer',
+  nat20: 'Natürliche 20!',
+  nat1: 'Natürliche 1',
+  total: 'Ergebnis',
 
   // Handouts
   newHandout: 'Neues Handout',
@@ -166,6 +185,26 @@ export const de = {
   noImages: 'Noch keine Bilder hochgeladen.',
   deleteAssetConfirm: '„{name}“ löschen? Karten, Figuren und Handouts verlieren dieses Bild.',
   mapHint: 'Ziehen: Karte verschieben · Mausrad: zoomen',
+
+  // Spielerverwaltung
+  playersTitle: 'Teilnehmer',
+  invitePlayers: 'Neue Spieler einladen',
+  inviteHint:
+    'Schicke diesen Link an deine Runde. Wer ihn öffnet, gibt einen Namen ein und ist dabei.',
+  noPlayers: 'Noch niemand beigetreten. Teile den Einladungslink oben.',
+  playerName: 'Name',
+  playerColor: 'Farbe',
+  characters: 'Charaktere',
+  tokensOfPlayer: 'Figuren (aktuelle Szene)',
+  assignCharacter: 'Charakter zuweisen …',
+  assignToken: 'Figur zuweisen …',
+  unassign: 'Zuordnung lösen',
+  personalLink: 'Persönlichen Link kopieren',
+  personalLinkHint: 'Einmal nutzbar – z. B. für ein anderes Gerät.',
+  removePlayer: 'Entfernen',
+  removePlayerConfirm:
+    '„{name}“ aus dem Abenteuer entfernen? Figuren und Charaktere bleiben erhalten und gehören dann der Spielleitung.',
+  nothingAssigned: 'nichts',
 } as const;
 
 export type Dict = { [K in keyof typeof de]: string };

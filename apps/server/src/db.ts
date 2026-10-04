@@ -121,7 +121,20 @@ export function openDb(dataDir: string): Db {
   const db = new DatabaseSync(path.join(dataDir, 'vtt.sqlite'));
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 3000;');
   db.exec(SCHEMA);
+  migrate(db);
   return db;
+}
+
+/** Fügt eine Spalte hinzu, falls sie in einer älteren Datenbank noch fehlt. */
+function ensureColumn(db: Db, table: string, column: string, ddl: string): void {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+}
+
+function migrate(db: Db): void {
+  ensureColumn(db, 'messages', 'character_name', 'character_name TEXT');
+  ensureColumn(db, 'messages', 'target', 'target INTEGER');
+  ensureColumn(db, 'players', 'rejoin_code', 'rejoin_code TEXT');
 }
 
 /** Führt `fn` in einer Transaktion aus. */

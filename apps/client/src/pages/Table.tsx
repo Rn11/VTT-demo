@@ -12,16 +12,18 @@ import { CharactersPanel } from '../components/CharactersPanel';
 import { AudioPanel } from '../components/AudioPanel';
 import { ScenePanel } from '../components/ScenePanel';
 import { NotesPanel } from '../components/NotesPanel';
+import { PlayersPanel } from '../components/PlayersPanel';
 
-type Tab = 'log' | 'handouts' | 'characters' | 'audio' | 'scene' | 'notes';
+type Tab = 'log' | 'handouts' | 'characters' | 'audio' | 'scene' | 'notes' | 'players';
 
-const TABS: { id: Tab; label: TextKey; gmOnly?: boolean }[] = [
-  { id: 'log', label: 'tabLog' },
-  { id: 'handouts', label: 'tabHandouts' },
-  { id: 'characters', label: 'tabCharacters' },
-  { id: 'audio', label: 'tabAudio' },
-  { id: 'scene', label: 'tabScene', gmOnly: true },
-  { id: 'notes', label: 'tabNotes', gmOnly: true },
+const TABS: { id: Tab; label: TextKey; icon: string; gmOnly?: boolean }[] = [
+  { id: 'log', label: 'tabLog', icon: '📜' },
+  { id: 'handouts', label: 'tabHandouts', icon: '✉️' },
+  { id: 'characters', label: 'tabCharacters', icon: '🛡️' },
+  { id: 'audio', label: 'tabAudio', icon: '🎵' },
+  { id: 'scene', label: 'tabScene', icon: '🗺️', gmOnly: true },
+  { id: 'notes', label: 'tabNotes', icon: '📝', gmOnly: true },
+  { id: 'players', label: 'tabPlayers', icon: '👥', gmOnly: true },
 ];
 
 function Errors() {
@@ -155,7 +157,10 @@ function Sidebar() {
             className={tab === x.id ? 'active' : ''}
             onClick={() => setTab(x.id)}
           >
-            {t(x.label)}
+            <span className="tab-icon" aria-hidden="true">
+              {x.icon}
+            </span>
+            <span className="tab-label">{t(x.label)}</span>
             {x.id === 'handouts' && unseen > 0 && tab !== 'handouts' && (
               <span className="badge">{unseen}</span>
             )}
@@ -169,6 +174,7 @@ function Sidebar() {
         {tab === 'audio' && <AudioPanel />}
         {tab === 'scene' && isGm && <ScenePanel />}
         {tab === 'notes' && isGm && <NotesPanel />}
+        {tab === 'players' && isGm && <PlayersPanel />}
       </div>
     </aside>
   );
@@ -209,6 +215,7 @@ export function TablePage({ adventureId }: { adventureId: string }) {
   if (access === 'denied' || status === 'denied')
     return <div className="center-msg">{t('noAccess')}</div>;
   if (status === 'gone') return <div className="center-msg">{t('adventureGone')}</div>;
+  if (status === 'kicked') return <div className="center-msg">{t('kicked')}</div>;
   if (access === 'checking' || status === 'idle' || status === 'connecting')
     return <div className="center-msg">{t('connecting')}</div>;
 

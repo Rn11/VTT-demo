@@ -69,6 +69,8 @@ export class Agent {
 export class Client {
   messages: ServerMessage[] = [];
   state!: Snapshot;
+  /** Wird mit dem Schließcode erfüllt, sobald der Server die Verbindung beendet. */
+  closed!: Promise<number>;
   private ws!: WebSocket;
   private waiters: { pred: (m: ServerMessage) => boolean; resolve: (m: ServerMessage) => void }[] =
     [];
@@ -78,6 +80,7 @@ export class Client {
     c.ws = new WebSocket(`${base.replace('http', 'ws')}/ws?adventure=${adventureId}`, {
       headers: { cookie: agent.cookieHeader },
     });
+    c.closed = new Promise((resolve) => c.ws.once('close', (code) => resolve(code)));
     c.ws.on('message', (raw) => {
       const m = JSON.parse(String(raw)) as ServerMessage;
       c.messages.push(m);

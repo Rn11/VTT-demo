@@ -9,7 +9,7 @@ import {
   type Message,
 } from '@vtt/shared';
 import type { Db } from './db';
-import { newId } from './db';
+import { newId, tx } from './db';
 import {
   getAdventure,
   getAssetRow,
@@ -17,6 +17,7 @@ import {
   toCharacter,
   toHandout,
   toNote,
+  toPlayer,
   toScene,
   toToken,
   type AdventureRow,
@@ -75,6 +76,16 @@ function saveAudio(ctx: Ctx, state: AudioState): void {
   ctx.rooms.broadcastAudio(ctx.adv.id, state);
 }
 
+/** Name des Charakters, für den gesprochen wird; Spieler nur für eigene Charaktere. */
+function speakerName(ctx: Ctx, characterId: string | null | undefined): string | null {
+  if (!characterId) return null;
+  const c = getOne(ctx.db, 'characters', toCharacter, characterId, ctx.adv.id);
+  if (!c) notFound('Charakter');
+  const v = ctx.conn.viewer;
+  if (v.role === 'player' && c!.ownerPlayerId !== v.playerId) deny();
+  return c!.name;
+}
+
 function addMessage(
   ctx: Ctx,
   m: Omit<Message, 'id' | 'createdAt' | 'authorId' | 'authorName'>,
@@ -89,7 +100,7 @@ function addMessage(
   };
   ctx.db
     .prepare(
-      'INSERT INTO messages (id, adventure_id, kind, author_id, author_name, text, roll, hidden, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO messages (id, adventure_id, kind, author_id, author_name, character_name, text, roll, target, hidden, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     )
     .run(
       msg.id,
@@ -97,8 +108,10 @@ function addMessage(
       msg.kind,
       msg.authorId,
       msg.authorName,
+      msg.characterName,
       msg.text,
       msg.roll ? JSON.stringify(msg.roll) : null,
+      msg.target,
       msg.hidden ? 1 : 0,
       msg.createdAt,
     );
@@ -347,13 +360,74 @@ export function handleAction(db: Db, rooms: Rooms, conn: Conn, msg: ClientMessag
       return;
     }
 
+    case 'player.update': {
+      requirePlayer(ctx, msg.id);
+      update(db, 'players', msg.id, { name: msg.name, color: msg.color });
+      const r = db.prepare('SELECT * FROM players WHERE id = ?').get(msg.id) as Record<
+        string,
+        unknown
+      >;
+      rooms.broadcastEntity(advId, 'player', toPlayer(r));
+      return;
+    }
+    case 'player.remove': {
+      requirePlayer(ctx, msg.id);
+      const pid = msg.id;
+      const ids = (sql: string) =>
+        (db.prepare(sql).all(pid, advId) as { id: string }[]).map((r) => String(r.id));
+      const tokenIds = ids('SELECT id FROM tokens WHERE owner_player_id = ? AND adventure_id = ?');
+      const charIds = ids(
+        'SELECT id FROM characters WHERE owner_player_id = ? AND adventure_id = ?',
+      );
+      const handouts = (
+        db.prepare('SELECT * FROM handouts WHERE adventure_id = ?').all(advId) as Record<
+          string,
+          unknown
+        >[]
+      )
+        .map(toHandout)
+        .filter((h) => h.playerIds.includes(pid));
+      tx(db, () => {
+        db.prepare('UPDATE tokens SET owner_player_id = NULL WHERE owner_player_id = ?').run(pid);
+        db.prepare('UPDATE characters SET owner_player_id = NULL WHERE owner_player_id = ?').run(
+          pid,
+        );
+        for (const h of handouts) {
+          db.prepare('UPDATE handouts SET player_ids = ? WHERE id = ?').run(
+            JSON.stringify(h.playerIds.filter((p) => p !== pid)),
+            h.id,
+          );
+        }
+        db.prepare('DELETE FROM players WHERE id = ?').run(pid);
+      });
+      rooms.closeWhere(
+        advId,
+        (c) => c.viewer.role === 'player' && c.viewer.playerId === pid,
+        4403,
+        'Entfernt',
+      );
+      rooms.broadcastRemove(advId, 'player', pid);
+      for (const t of tokenIds) rooms.broadcastEntity(advId, 'token', token(t));
+      for (const c of charIds) rooms.broadcastEntity(advId, 'character', character(c));
+      for (const h of handouts) rooms.broadcastEntity(advId, 'handout', handout(h.id));
+      return;
+    }
+
     case 'chat.send': {
       const text = msg.text.trim();
       if (!text) return;
-      addMessage(ctx, { kind: 'chat', text, roll: null, hidden: false });
+      addMessage(ctx, {
+        kind: 'chat',
+        text,
+        roll: null,
+        hidden: false,
+        characterName: speakerName(ctx, msg.as),
+        target: null,
+      });
       return;
     }
     case 'dice.roll': {
+      const characterName = speakerName(ctx, msg.as);
       try {
         const roll = rollDice(msg.expression, (sides) => randomInt(1, sides + 1));
         addMessage(ctx, {
@@ -361,6 +435,8 @@ export function handleAction(db: Db, rooms: Rooms, conn: Conn, msg: ClientMessag
           text: msg.label?.trim() ?? '',
           roll,
           hidden: Boolean(msg.hidden),
+          characterName,
+          target: msg.target ?? null,
         });
       } catch (err) {
         if (err instanceof DiceError) throw new ActionError(`Würfelausdruck: ${err.message}`);

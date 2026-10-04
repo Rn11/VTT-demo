@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   DiceError,
   describeRoll,
+  describeTerm,
+  germanExpression,
+  naturalD20,
+  percentileOutcome,
   fieldRollExpression,
   getTemplate,
   parseDice,
@@ -110,5 +114,42 @@ describe('fieldRollExpression', () => {
     const field = getTemplate('coc7').sections[1]!.fields[0]!;
     expect(fieldRollExpression(field, 50)).toBe('d100');
     expect(field.under).toBe(true);
+  });
+});
+
+describe('Klartext fürs Protokoll', () => {
+  it('schreibt Ausdrücke auf Deutsch', () => {
+    expect(germanExpression('2d6+3')).toBe('2W6+3');
+    expect(germanExpression('d%')).toBe('W100');
+    expect(germanExpression('4d6kh3')).toBe('4W6kh3');
+    expect(germanExpression('2w6+2')).toBe('2W6+2');
+  });
+
+  it('beschreibt Behalten-Regeln', () => {
+    const t = rollDice('4d6kh3', seq(1, 2, 3, 4)).terms[0]!;
+    expect(t.type === 'dice' && describeTerm(t)).toBe('4W6, die 3 höchsten zählen');
+    const adv = rollDice('2d20kl1', seq(5, 9)).terms[0]!;
+    expect(adv.type === 'dice' && describeTerm(adv)).toBe('2W20, der niedrigste zählt');
+    const plain = rollDice('d10', seq(5)).terms[0]!;
+    expect(plain.type === 'dice' && describeTerm(plain)).toBe('W10');
+  });
+
+  it('bewertet Prozentwürfe', () => {
+    expect(percentileOutcome(9, 45)).toBe('extreme');
+    expect(percentileOutcome(22, 45)).toBe('hard');
+    expect(percentileOutcome(45, 45)).toBe('regular');
+    expect(percentileOutcome(46, 45)).toBe('failure');
+    expect(percentileOutcome(100, 90)).toBe('fumble');
+    expect(percentileOutcome(97, 40)).toBe('fumble');
+    expect(percentileOutcome(97, 60)).toBe('failure');
+  });
+
+  it('erkennt natürliche 20 und 1', () => {
+    expect(naturalD20(rollDice('d20+5', seq(20)))).toBe(20);
+    expect(naturalD20(rollDice('W20', seq(1)))).toBe(1);
+    expect(naturalD20(rollDice('2d20kh1', seq(3, 20)))).toBe(20);
+    expect(naturalD20(rollDice('d20', seq(12)))).toBeNull();
+    expect(naturalD20(rollDice('2d20', seq(20, 20)))).toBeNull();
+    expect(naturalD20(rollDice('d12', seq(12)))).toBeNull();
   });
 });

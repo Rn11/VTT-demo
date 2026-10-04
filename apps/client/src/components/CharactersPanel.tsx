@@ -85,7 +85,7 @@ function Field({
       <label htmlFor={id}>{field.label}</label>
       <div className="field-input">
         {input}
-        {expr && (
+        {expr && editable && (
           <button
             type="button"
             className="die-btn small"
@@ -115,7 +115,9 @@ function Sheet({ c }: { c: Character }) {
     send({
       type: 'dice.roll',
       expression: expr,
-      label: `${c.name}: ${field.label}${target !== null ? ` (${t('target', { value: target })})` : ''}`,
+      label: field.label,
+      as: c.id,
+      ...(target !== null ? { target } : {}),
     });
 
   const setCustom = (custom: Character['custom']) =>
