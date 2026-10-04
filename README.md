@@ -45,6 +45,16 @@ docker compose up -d
 
 Der Spieltisch läuft auf Port 3000, die Daten liegen im Docker-Volume `vtt-data`.
 
+## Demo ausprobieren
+
+So spielst du allein beide Rollen durch:
+
+1. Starte den Spieltisch (siehe oben) und öffne ihn im Browser.
+2. Lege das Spielleiter-Konto an und dann ein Abenteuer mit Haken bei **„Mit Beispielkarte und -figuren“**.
+3. Klicke **„Einladungslink kopieren“** und öffne den Link in einem **privaten Fenster** (oder einem anderen Browser). Dort bist du Spieler.
+4. Probiere es aus: Figuren ziehen, im Reiter **Handouts** den Brief für alle aufdecken, im Reiter **Protokoll** würfeln, unter **Charaktere** einen Bogen anlegen, unter **Musik** eine MP3 hochladen und abspielen.
+5. Achte darauf, dass der Spieler das versteckte Ungeheuer im Wasserbecken und die Notizen der Spielleitung nicht sieht.
+
 ## So wird gespielt
 
 1. Die Spielleitung meldet sich an und legt ein Abenteuer an.
@@ -101,5 +111,9 @@ Alle Oberflächentexte stehen in `apps/client/src/i18n/de.ts`. Für eine weitere
 
 - Nebel des Krieges (Bereiche aufdecken)
 - Zeichnen und Markieren auf der Karte
-- Tisch-Ansicht für einen Fernseher oder Beamer am echten Tisch
 - Englische Oberfläche
+- Hosting auf einem eigenen Server mit HTTPS
+
+## Lizenz
+
+Noch keine Lizenz festgelegt. Bis dahin gilt: alle Rechte vorbehalten.
